@@ -1,0 +1,19 @@
+
+version: '3.1'
+
+services:
+
+  web-server:
+    image: php:7.2-apache
+    restart: always
+    container_name: GULP-TEMPLATE
+    ports:
+      - 8271:80
+    volumes:
+      - ./dist/:/var/www/html
+    networks:
+      - netProject
+
+networks:
+  netProject:
+    driver: bridge
