@@ -15,22 +15,15 @@ gulp.task("html", function() {
         .pipe(gulp.dest("dist"));
 });
 //Копирование файлов js  из папки vendor
-gulp.task("vendorJS", function () {
-    return gulp.src ("app/vendor/**/*.js")
-            .pipe (gulp.dest("dist/vendor/js"))
-});
-//Копирование файлов css из папки vendor
-gulp.task("vendorCSS", function () {
-    return gulp.src ("app/vendor/**/*.css")
-            .pipe (gulp.dest("dist/vendor/css"))
+gulp.task("vendors", function () {
+    return gulp.src ("app/vendor/**/*.+(css|js|png|gif)")
+            .pipe (gulp.dest("dist/vendor/"))
 });
 //Копируем шрифты
 gulp.task('fonts', function() {
   return gulp.src('app/fonts/**/*')
     .pipe(gulp.dest('dist/fonts'))
 });
-
-
 //Минификация и конкатенация CSS
 gulp.task("csso", function() {
     return gulp.src("app/css/**/*.css")
@@ -40,17 +33,15 @@ gulp.task("csso", function() {
         .pipe(rename({ suffix: '.min' }))
         .pipe(gulp.dest("dist/css"));
 });
-
 // Объединение (конкатенация) и сжатие(минификация) JS-файлов
 gulp.task("scripts", function() {
-    return gulp.src("src/js/*.js") // директория откуда брать исходники
+    return gulp.src("app/js/*.js") // директория откуда брать исходники
         .pipe(concat('main.js')) // объеденим все js-файлы в один 
-        .pipe(uglify()) // вызов плагина uglify - сжатие кода
+        //.pipe(uglify()) // вызов плагина uglify - сжатие кода
         .pipe(rename({ suffix: '.min' })) // вызов плагина rename - переименование файла с приставкой .min
         .pipe(gulp.dest("dist/js")); // директория продакшена, т.е. куда сложить готовый файл
 });
-
-//Сжатие изображений 
+//Сжатие изображений
 gulp.task("images", function() {
     return gulp.src("app/img/**/*.+(png|jpeg|jpg|svg|gif)")
             .pipe(cache(imagemin({
@@ -60,26 +51,21 @@ gulp.task("images", function() {
             })))
             .pipe(gulp.dest("dist/img"))
 });
-
 //Следить за изменениями в файлах
 gulp.task('watch', function(){
     gulp.watch('app/**/*.html',  gulp.parallel('html'));
     gulp.watch("app/css/**/*.css",  gulp.parallel('csso'));
     gulp.watch("app/js/**/*.js",  gulp.parallel('scripts'));
-    gulp.watch("app/vendor/**/*.css",  gulp.parallel('vendorCSS'));
-    gulp.watch("app/vendor/**/*.js",  gulp.parallel('vendorJS'));
+    gulp.watch("app/vendor/**/*",  gulp.parallel('vendors'));
     gulp.watch("app/img/**/*",  gulp.parallel('images'));
 });
-
 gulp.task("clean", function () {
    return del.sync('dist'); // Удаляем папку dist перед сборкой 
 });
-//Ошистка кеша
+//Очистка кеша
 gulp.task('clear', function (callback) {
 	return cache.clearAll();
 })
-
-
 // Запуск тасков по умолчанию
-gulp.task("default", gulp.parallel("html", "csso", "scripts", "images", "fonts", "vendorJS", "vendorCSS", "watch"));
-gulp.task("build", gulp.parallel("clean","html", "csso", "scripts", "images", "fonts", "vendorJS", "vendorCSS"));
+gulp.task("default", gulp.parallel("html", "csso", "scripts", "images", "fonts", "vendors",  "watch"));
+gulp.task("build", gulp.parallel("clean", "html", "csso", "scripts", "images", "fonts", "vendors"));
